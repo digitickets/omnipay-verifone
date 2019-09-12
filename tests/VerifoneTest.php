@@ -25,7 +25,7 @@ class VerifoneTest extends GatewayTestCase
     /**
      * Setup
      */
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->gateway = new Gateway(

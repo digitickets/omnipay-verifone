@@ -41,6 +41,16 @@ This is a sample code of standard Off-site controller using the driver.
 // Gateway setup
 $gateway = $this->gatewayFactory('Verifone');
 
+// Pluigns specific parameters
+gateway->setMerchantId('00000001');
+$gateway->setSystemGuid('12333312322');
+$gateway->setTemplateId(123);
+//base64 encoded key
+$gateway->setKey('asd123asd123=');
+$gateway->setKeyName('key_name');
+$gateway->setAccount('account');
+$gateway->setTestMode(true);
+
 // Create or fetch your product transaction
 $transaction = $this->createTransaction($request);
 
@@ -78,6 +88,16 @@ $transaction = Transaction::findOrFail($transactionId);
 
 // Gateway setup
 $gateway = $this->gatewayFactory('Verifone');
+
+// Pluigns specific parameters
+gateway->setMerchantId('00000001');
+$gateway->setSystemGuid('12333312322');
+$gateway->setTemplateId(123);
+//base64 encoded key
+$gateway->setKey('asd123asd123=');
+$gateway->setKeyName('key_name');
+$gateway->setAccount('account');
+$gateway->setTestMode(true);
 
 // Get the data ready to complete the payment. Since this is typically a stateless callback
 // we need to first retrieve our original product transaction details

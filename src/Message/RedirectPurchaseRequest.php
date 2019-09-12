@@ -33,9 +33,9 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     }
 
     /**
-     * @param \Omnipay\Common\CreditCard $card
+     * @param CreditCard $card
      *
-     * @return \Omnipay\Verifone\Helper\Address
+     * @return Address
      */
     protected function getCustomerAddress(CreditCard $card)
     {
@@ -52,9 +52,9 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     }
 
     /**
-     * @param \Omnipay\Common\CreditCard $card
+     * @param CreditCard $card
      *
-     * @return \Omnipay\Verifone\Helper\Address
+     * @return Address
      */
     protected function getDeliveryAddress(CreditCard $card)
     {
@@ -112,6 +112,7 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
 
     /**
      * @return EftRequest
+     * @throws \Omnipay\Common\Exception\InvalidRequestException
      */
     protected function getEftRequest()
     {
@@ -155,6 +156,7 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
      * It calculates the HASH that we need to send to the provider as well.
      *
      * @return array
+     * @throws \Omnipay\Common\Exception\InvalidRequestException
      */
     public function getData(): array
     {
@@ -234,9 +236,10 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     }
 
     /**
-     * @param \Omnipay\Common\CreditCard $card
+     * @param CreditCard $card
      *
      * @return \Omnipay\Verifone\Helper\PostData
+     * @throws \Omnipay\Common\Exception\InvalidRequestException
      */
     protected function getPostData(CreditCard $card): PostData
     {
@@ -246,7 +249,7 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
         $postData->fromArray(
             [
                 'api' => 2,
-                //'keyname' => $this->getKeyName(),
+                'keyname' => $this->getKeyName(),
                 'merchantid' => $this->getMerchantId(),
                 'requesttype' => 'eftrequest',
                 'requestdata' => $requestData,
@@ -257,15 +260,15 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     }
 
     /**
-     * @param $aesKey
-     * @param $dataToEncrypt
+     * @param string $aesKey Base64 encoded key
+     * @param string $dataToEncrypt
      *
-     * @return string
+     * @return string base64 encoded
      */
     protected function encrypt($aesKey, $dataToEncrypt)
     {
         $iv = '{{{{{{{{{{{{{{{{';
-        $output = openssl_encrypt($dataToEncrypt, 'AES-128-CBC', $aesKey,
+        $output = openssl_encrypt($dataToEncrypt, 'AES-256-CBC', base64_decode($aesKey),
             OPENSSL_RAW_DATA, $iv);
         $output = base64_encode($output);
 
@@ -273,8 +276,8 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     }
 
     /**
-     * @param $aesKey
-     * @param $dataTodecrypt
+     * @param string $aesKey Base64 encoded key
+     * @param string $dataTodecrypt Base64 encoded data
      *
      * @return string
      */
@@ -282,8 +285,8 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
     {
         $iv = '{{{{{{{{{{{{{{{{';
         $dataTodecrypt = base64_decode($dataTodecrypt);
-        $output = openssl_decrypt($dataTodecrypt, 'AES-128-CBC',
-            $aesKey, OPENSSL_RAW_DATA, $iv);
+        $output = openssl_decrypt($dataTodecrypt, 'AES-256-CBC',
+            base64_decode($aesKey), OPENSSL_RAW_DATA, $iv);
 
         return $output;
     }

@@ -2,9 +2,19 @@
 
 namespace Omnipay\Verifone\Message;
 
+/**
+ * Class RedirectPurchaseResponse
+ * @package Omnipay\Verifone\Message
+ */
 class RedirectPurchaseResponse extends AbstractPurchaseResponse
 {
-    protected $liveCheckoutEndpoint = '';
+    /**
+     * @var string
+     */
+    protected $liveCheckoutEndpoint = 'https://paypage2-cst.cxmlpg.com/paypage.aspx';
+    /**
+     * @var string
+     */
     protected $testCheckoutEndpoint = 'https://paypage2-cst.cxmlpg.com/paypage.aspx';
 
     /**
@@ -60,10 +70,4 @@ class RedirectPurchaseResponse extends AbstractPurchaseResponse
     {
         return $this->getRequest()->getTestMode() ? $this->testCheckoutEndpoint : $this->liveCheckoutEndpoint;
     }
-
-    public function isSuccessful(): bool
-    {
-        return true;
-    }
-
 }
