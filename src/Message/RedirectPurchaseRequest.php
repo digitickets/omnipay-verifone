@@ -167,7 +167,7 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
 
         $requestData = $postdata->getRequestdata()->asXmlString();
 
-        if ($this->getKey() && $this->getKeyName()) {
+        if ($this->encryptionEnabled()) {
             //encryption data present so we use it to encrypt the content of
             // the request
             $requestData = $this->encrypt(
@@ -249,14 +249,25 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
         $postData->fromArray(
             [
                 'api' => 2,
-                'keyname' => $this->getKeyName(),
                 'merchantid' => $this->getMerchantId(),
                 'requesttype' => 'eftrequest',
                 'requestdata' => $requestData,
             ]
         );
 
+        if ($this->encryptionEnabled()) {
+            $postData->setKeyname($this->getKeyName());
+        }
+        
         return $postData;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function encryptionEnabled()
+    {
+        return ($this->getKey() && $this->getKeyName());
     }
 
     /**

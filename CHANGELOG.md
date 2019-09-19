@@ -9,3 +9,7 @@
 ## 0.1.0
 
   - Redirect responses returns false on isSuccessful()
+
+## 0.1.1
+
+- Uses keyname parameter only when supplied
