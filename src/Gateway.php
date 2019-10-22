@@ -43,7 +43,7 @@ class Gateway extends AbstractGateway
     {
         return [
             'testMode' => true,
-            'merchantId'=>null,
+            'merchantId' => null,
             'systemGuid' => null,
             'templateId' => null,
             'key' => null,

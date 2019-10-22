@@ -19,6 +19,9 @@ use Omnipay\Common\Message\ResponseInterface;
 
 class RedirectPurchaseRequest extends AbstractPurchaseRequest
 {
+    const IV = '{{{{{{{{{{{{{{{{';
+    const ENCRYPT_METHOD = 'AES-256-CBC';
+
     /**
      * @return Merchant
      */
@@ -43,8 +46,10 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
             'address1' => $card->getAddress1(),
             'address2' => $card->getAddress2(),
             'country' => $card->getCountry(),
-            'countrycode' => $this->getCountry($card->getCountry(),
-                'numeric'),
+            'countrycode' => $this->getCountry(
+                $card->getCountry(),
+                'numeric'
+            ),
             'county' => $card->getState(),
             'postcode' => $card->getPostcode(),
             'town' => $card->getCity(),
@@ -62,8 +67,10 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
             'address1' => $card->getShippingAddress1(),
             'address2' => $card->getShippingAddress2(),
             'country' => $card->getShippingCountry(),
-            'countrycode' => $this->getCountry($card->getShippingCountry(),
-                'numeric'),
+            'countrycode' => $this->getCountry(
+                $card->getShippingCountry(),
+                'numeric'
+            ),
             'county' => $card->getShippingState(),
             'postcode' => $card->getShippingPostcode(),
             'town' => $card->getShippingCity(),
@@ -133,7 +140,6 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
             'transactionvalue' => $this->getAmount(),
             'template' => $this->getTemplate(),
         ]);
-
     }
 
     /**
@@ -147,7 +153,8 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
         return htmlentities(
             $input,
             ENT_COMPAT,
-            'UTF-8');
+            'UTF-8'
+        );
     }
 
     /**
@@ -167,11 +174,32 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
 
         $requestData = $postdata->getRequestdata()->asXmlString();
 
+        // $requestData2 = '<?xml version="1.0" encoding="utf-8"? >
+        //     <eftrequest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        //         <merchant>
+        //             <merchantid>1000001577</merchantid>
+        //             <systemguid>F90974D4-704F-4A92-8123-6FDE9D86B748</systemguid>
+        //         </merchant>
+        //         <accountid>140015178</accountid>
+        //         <capturemethod>12</capturemethod>
+        //         <processingidentifier>1</processingidentifier>
+        //         <transactionvalue>10.00</transactionvalue>
+        //         <showorderconfirmation>false</showorderconfirmation>
+        //         <showpaymentresult>false</showpaymentresult>
+        //         <customer>
+        //         <email>NickG5@verifone.com</email>
+        //         </customer>
+        //         <registertoken>false</registertoken>
+        //     </eftrequest>';
+
+        // dd($requestData);
+
         if ($this->encryptionEnabled()) {
             //encryption data present so we use it to encrypt the content of
             // the request
             $requestData = $this->encrypt(
-                $this->getKey(), $requestData
+                $this->getKey(),
+                $requestData
             );
         } else {
             $requestData = $this->sanitize(
@@ -258,7 +286,7 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
         if ($this->encryptionEnabled()) {
             $postData->setKeyname($this->getKeyName());
         }
-        
+
         return $postData;
     }
 
@@ -278,9 +306,14 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
      */
     protected function encrypt($aesKey, $dataToEncrypt)
     {
-        $iv = '{{{{{{{{{{{{{{{{';
-        $output = openssl_encrypt($dataToEncrypt, 'AES-256-CBC', base64_decode($aesKey),
-            OPENSSL_RAW_DATA, $iv);
+        // dd($dataToEncrypt);
+        $output = openssl_encrypt(
+            $dataToEncrypt,
+            static::ENCRYPT_METHOD,
+            base64_decode($aesKey),
+            OPENSSL_RAW_DATA,
+            static::IV
+        );
         $output = base64_encode($output);
 
         return $output;
@@ -294,10 +327,14 @@ class RedirectPurchaseRequest extends AbstractPurchaseRequest
      */
     protected function decrypt($aesKey, $dataTodecrypt)
     {
-        $iv = '{{{{{{{{{{{{{{{{';
         $dataTodecrypt = base64_decode($dataTodecrypt);
-        $output = openssl_decrypt($dataTodecrypt, 'AES-256-CBC',
-            base64_decode($aesKey), OPENSSL_RAW_DATA, $iv);
+        $output = openssl_decrypt(
+            $dataTodecrypt,
+            static::ENCRYPT_METHOD,
+            base64_decode($aesKey),
+            OPENSSL_RAW_DATA,
+            static::IV
+        );
 
         return $output;
     }
